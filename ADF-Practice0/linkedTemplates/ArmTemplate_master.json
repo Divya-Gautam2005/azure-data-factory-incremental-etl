@@ -7,17 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "ADF-Practice0"
 		},
-		"LS_OnPremSQL_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_OnPremSQL'"
-		},
 		"LS_ADLS_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_ADLS'"
 		},
-		"integrationRuntime1_properties_typeProperties_linkedInfo_resourceId": {
+		"LS_OnPremSQL_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_OnPremSQL'"
+		},
+		"LS_ADLS_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "/subscriptions/4ba37642-afc3-4c59-9758-b9ce27d9ea7f/resourcegroups/free-rg/providers/Microsoft.DataFactory/factories/a-d-f-1/integrationruntimes/SHIR-AdventureWorks"
+			"defaultValue": "https://divya12.dfs.core.windows.net/"
 		},
 		"LS_OnPremSQL_properties_typeProperties_server": {
 			"type": "string",
@@ -31,9 +31,9 @@
 			"type": "string",
 			"defaultValue": "DIVYAGAUTAM\\Divya Gautam"
 		},
-		"LS_ADLS_properties_typeProperties_url": {
+		"integrationRuntime1_properties_typeProperties_linkedInfo_resourceId": {
 			"type": "string",
-			"defaultValue": "https://divya12.dfs.core.windows.net/"
+			"defaultValue": "/subscriptions/4ba37642-afc3-4c59-9758-b9ce27d9ea7f/resourcegroups/free-rg/providers/Microsoft.DataFactory/factories/a-d-f-1/integrationruntimes/SHIR-AdventureWorks"
 		},
 		"containerUri": {
 			"type": "string",
@@ -62,14 +62,17 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"LS_OnPremSQL_password": {
-						"value": "[parameters('LS_OnPremSQL_password')]"
-					},
 					"LS_ADLS_accountKey": {
 						"value": "[parameters('LS_ADLS_accountKey')]"
 					},
+					"LS_OnPremSQL_password": {
+						"value": "[parameters('LS_OnPremSQL_password')]"
+					},
 					"integrationRuntime1_properties_typeProperties_linkedInfo_resourceId": {
 						"value": "[parameters('integrationRuntime1_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"LS_ADLS_properties_typeProperties_url": {
+						"value": "[parameters('LS_ADLS_properties_typeProperties_url')]"
 					},
 					"LS_OnPremSQL_properties_typeProperties_server": {
 						"value": "[parameters('LS_OnPremSQL_properties_typeProperties_server')]"
@@ -79,9 +82,6 @@
 					},
 					"LS_OnPremSQL_properties_typeProperties_userName": {
 						"value": "[parameters('LS_OnPremSQL_properties_typeProperties_userName')]"
-					},
-					"LS_ADLS_properties_typeProperties_url": {
-						"value": "[parameters('LS_ADLS_properties_typeProperties_url')]"
 					}
 				}
 			},

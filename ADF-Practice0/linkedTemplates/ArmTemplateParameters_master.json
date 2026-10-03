@@ -5,14 +5,14 @@
 		"factoryName": {
 			"value": "ADF-Practice0"
 		},
-		"LS_OnPremSQL_password": {
-			"value": ""
-		},
 		"LS_ADLS_accountKey": {
 			"value": ""
 		},
-		"integrationRuntime1_properties_typeProperties_linkedInfo_resourceId": {
-			"value": "/subscriptions/4ba37642-afc3-4c59-9758-b9ce27d9ea7f/resourcegroups/free-rg/providers/Microsoft.DataFactory/factories/a-d-f-1/integrationruntimes/SHIR-AdventureWorks"
+		"LS_OnPremSQL_password": {
+			"value": ""
+		},
+		"LS_ADLS_properties_typeProperties_url": {
+			"value": "https://divya12.dfs.core.windows.net/"
 		},
 		"LS_OnPremSQL_properties_typeProperties_server": {
 			"value": "@{linkedService().ServerName}"
@@ -23,8 +23,8 @@
 		"LS_OnPremSQL_properties_typeProperties_userName": {
 			"value": "DIVYAGAUTAM\\Divya Gautam"
 		},
-		"LS_ADLS_properties_typeProperties_url": {
-			"value": "https://divya12.dfs.core.windows.net/"
+		"integrationRuntime1_properties_typeProperties_linkedInfo_resourceId": {
+			"value": "/subscriptions/4ba37642-afc3-4c59-9758-b9ce27d9ea7f/resourcegroups/free-rg/providers/Microsoft.DataFactory/factories/a-d-f-1/integrationruntimes/SHIR-AdventureWorks"
 		},
 		"containerUri": {
 			"value": ""

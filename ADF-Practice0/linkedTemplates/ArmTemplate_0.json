@@ -7,17 +7,21 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "ADF-Practice0"
 		},
-		"LS_OnPremSQL_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_OnPremSQL'"
-		},
 		"LS_ADLS_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_ADLS'"
 		},
+		"LS_OnPremSQL_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_OnPremSQL'"
+		},
 		"integrationRuntime1_properties_typeProperties_linkedInfo_resourceId": {
 			"type": "string",
 			"defaultValue": "/subscriptions/4ba37642-afc3-4c59-9758-b9ce27d9ea7f/resourcegroups/free-rg/providers/Microsoft.DataFactory/factories/a-d-f-1/integrationruntimes/SHIR-AdventureWorks"
+		},
+		"LS_ADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://divya12.dfs.core.windows.net/"
 		},
 		"LS_OnPremSQL_properties_typeProperties_server": {
 			"type": "string",
@@ -30,10 +34,6 @@
 		"LS_OnPremSQL_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "DIVYAGAUTAM\\Divya Gautam"
-		},
-		"LS_ADLS_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://divya12.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -54,6 +54,29 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('LS_ADLS_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "integrationRuntime1",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_OnPremSQL')]",
@@ -89,59 +112,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ADLS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('LS_ADLS_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('LS_ADLS_accountKey')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "integrationRuntime1",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SQL_Generic')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_OnPremSQL",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"ServerName": "localhost\\SQLEXPRESS",
-						"DatabaseName": "ADF_Incremental_ETL"
-					}
-				},
-				"parameters": {
-					"SchemaName": {
-						"type": "string"
-					},
-					"TableName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_OnPremSQL')]"
 			]
 		},
 		{
@@ -191,6 +161,36 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_Generic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_OnPremSQL",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ServerName": "localhost\\SQLEXPRESS",
+						"DatabaseName": "ADF_Incremental_ETL"
+					}
+				},
+				"parameters": {
+					"SchemaName": {
+						"type": "string"
+					},
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_OnPremSQL')]"
 			]
 		},
 		{
@@ -351,7 +351,10 @@
 									"typeProperties": {
 										"source": {
 											"type": "SqlServerSource",
-											"sqlReaderQuery": "@concat(\n    'SELECT MAX(',\n    item().WatermarkColumn,\n    ') AS NewWatermark FROM ',\n    item().SourceSchema,\n    '.',\n    item().SourceTable\n)",
+											"sqlReaderQuery": {
+												"value": "@concat(\n    'SELECT MAX(',\n    item().WatermarkColumn,\n    ') AS NewWatermark FROM ',\n    item().SourceSchema,\n    '.',\n    item().SourceTable\n)",
+												"type": "Expression"
+											},
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
@@ -401,7 +404,10 @@
 												"type": "String"
 											},
 											"NewWatermark": {
-												"value": "@activity('Lookup_New_Watermark').output.firstRow.NewWatermark",
+												"value": {
+													"value": "@activity('Lookup_New_Watermark').output.firstRow.NewWatermark",
+													"type": "Expression"
+												},
 												"type": "Datetime"
 											}
 										}
@@ -438,15 +444,24 @@
 										"storedProcedureName": "[[dbo].[Log_ETL_Process]",
 										"storedProcedureParameters": {
 											"PipelineName": {
-												"value": "@pipeline().Pipeline",
+												"value": {
+													"value": "@pipeline().Pipeline",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"TableName": {
-												"value": "@item().SourceTable",
+												"value": {
+													"value": "@item().SourceTable",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"LoadType": {
-												"value": "@item().LoadType",
+												"value": {
+													"value": "@item().LoadType",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"StartTime": {
@@ -457,7 +472,10 @@
 												"type": "Datetime"
 											},
 											"EndTime": {
-												"value": "@utcnow()",
+												"value": {
+													"value": "@utcnow()",
+													"type": "Expression"
+												},
 												"type": "Datetime"
 											},
 											"Status": {
@@ -497,7 +515,10 @@
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "StartTime",
-										"value": "@utcnow()"
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										}
 									}
 								},
 								{
@@ -523,15 +544,24 @@
 										"storedProcedureName": "[[dbo].[Log_ETL_Process]",
 										"storedProcedureParameters": {
 											"PipelineName": {
-												"value": "@pipeline().Pipeline",
+												"value": {
+													"value": "@pipeline().Pipeline",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"TableName": {
-												"value": "@item().SourceTable",
+												"value": {
+													"value": "@item().SourceTable",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"LoadType": {
-												"value": "@item().LoadType",
+												"value": {
+													"value": "@item().LoadType",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"StartTime": {
@@ -542,7 +572,10 @@
 												"type": "Datetime"
 											},
 											"EndTime": {
-												"value": "@utcnow()",
+												"value": {
+													"value": "@utcnow()",
+													"type": "Expression"
+												},
 												"type": "Datetime"
 											},
 											"Status": {

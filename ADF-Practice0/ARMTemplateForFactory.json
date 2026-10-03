@@ -7,17 +7,17 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "ADF-Practice0"
 		},
-		"LS_OnPremSQL_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_OnPremSQL'"
-		},
 		"LS_ADLS_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_ADLS'"
 		},
-		"integrationRuntime1_properties_typeProperties_linkedInfo_resourceId": {
+		"LS_OnPremSQL_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_OnPremSQL'"
+		},
+		"LS_ADLS_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "/subscriptions/4ba37642-afc3-4c59-9758-b9ce27d9ea7f/resourcegroups/free-rg/providers/Microsoft.DataFactory/factories/a-d-f-1/integrationruntimes/SHIR-AdventureWorks"
+			"defaultValue": "https://divya12.dfs.core.windows.net/"
 		},
 		"LS_OnPremSQL_properties_typeProperties_server": {
 			"type": "string",
@@ -31,168 +31,15 @@
 			"type": "string",
 			"defaultValue": "DIVYAGAUTAM\\Divya Gautam"
 		},
-		"LS_ADLS_properties_typeProperties_url": {
+		"integrationRuntime1_properties_typeProperties_linkedInfo_resourceId": {
 			"type": "string",
-			"defaultValue": "https://divya12.dfs.core.windows.net/"
+			"defaultValue": "/subscriptions/4ba37642-afc3-4c59-9758-b9ce27d9ea7f/resourcegroups/free-rg/providers/Microsoft.DataFactory/factories/a-d-f-1/integrationruntimes/SHIR-AdventureWorks"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/integrationRuntime1')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"typeProperties": {
-					"linkedInfo": {
-						"resourceId": "[parameters('integrationRuntime1_properties_typeProperties_linkedInfo_resourceId')]",
-						"authorizationType": "Rbac"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_OnPremSQL')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"parameters": {
-					"ServerName": {
-						"type": "string"
-					},
-					"DatabaseName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"server": "[parameters('LS_OnPremSQL_properties_typeProperties_server')]",
-					"database": "[parameters('LS_OnPremSQL_properties_typeProperties_database')]",
-					"encrypt": "mandatory",
-					"trustServerCertificate": true,
-					"authenticationType": "Windows",
-					"userName": "[parameters('LS_OnPremSQL_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_OnPremSQL_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "integrationRuntime1",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ADLS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('LS_ADLS_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('LS_ADLS_accountKey')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "integrationRuntime1",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SQL_Generic')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_OnPremSQL",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"ServerName": "localhost\\SQLEXPRESS",
-						"DatabaseName": "ADF_Incremental_ETL"
-					}
-				},
-				"parameters": {
-					"SchemaName": {
-						"type": "string"
-					},
-					"TableName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_OnPremSQL')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Generic')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"Container": {
-						"type": "string"
-					},
-					"Folder": {
-						"type": "string"
-					},
-					"FileName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().FileName",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().Folder",
-							"type": "Expression"
-						},
-						"fileSystem": {
-							"value": "@dataset().Container",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS')]"
-			]
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_ETL_Master')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -351,7 +198,10 @@
 									"typeProperties": {
 										"source": {
 											"type": "SqlServerSource",
-											"sqlReaderQuery": "@concat(\n    'SELECT MAX(',\n    item().WatermarkColumn,\n    ') AS NewWatermark FROM ',\n    item().SourceSchema,\n    '.',\n    item().SourceTable\n)",
+											"sqlReaderQuery": {
+												"value": "@concat(\n    'SELECT MAX(',\n    item().WatermarkColumn,\n    ') AS NewWatermark FROM ',\n    item().SourceSchema,\n    '.',\n    item().SourceTable\n)",
+												"type": "Expression"
+											},
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
@@ -401,7 +251,10 @@
 												"type": "String"
 											},
 											"NewWatermark": {
-												"value": "@activity('Lookup_New_Watermark').output.firstRow.NewWatermark",
+												"value": {
+													"value": "@activity('Lookup_New_Watermark').output.firstRow.NewWatermark",
+													"type": "Expression"
+												},
 												"type": "Datetime"
 											}
 										}
@@ -438,15 +291,24 @@
 										"storedProcedureName": "[[dbo].[Log_ETL_Process]",
 										"storedProcedureParameters": {
 											"PipelineName": {
-												"value": "@pipeline().Pipeline",
+												"value": {
+													"value": "@pipeline().Pipeline",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"TableName": {
-												"value": "@item().SourceTable",
+												"value": {
+													"value": "@item().SourceTable",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"LoadType": {
-												"value": "@item().LoadType",
+												"value": {
+													"value": "@item().LoadType",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"StartTime": {
@@ -457,7 +319,10 @@
 												"type": "Datetime"
 											},
 											"EndTime": {
-												"value": "@utcnow()",
+												"value": {
+													"value": "@utcnow()",
+													"type": "Expression"
+												},
 												"type": "Datetime"
 											},
 											"Status": {
@@ -497,7 +362,10 @@
 									"userProperties": [],
 									"typeProperties": {
 										"variableName": "StartTime",
-										"value": "@utcnow()"
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										}
 									}
 								},
 								{
@@ -523,15 +391,24 @@
 										"storedProcedureName": "[[dbo].[Log_ETL_Process]",
 										"storedProcedureParameters": {
 											"PipelineName": {
-												"value": "@pipeline().Pipeline",
+												"value": {
+													"value": "@pipeline().Pipeline",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"TableName": {
-												"value": "@item().SourceTable",
+												"value": {
+													"value": "@item().SourceTable",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"LoadType": {
-												"value": "@item().LoadType",
+												"value": {
+													"value": "@item().LoadType",
+													"type": "Expression"
+												},
 												"type": "String"
 											},
 											"StartTime": {
@@ -542,7 +419,10 @@
 												"type": "Datetime"
 											},
 											"EndTime": {
-												"value": "@utcnow()",
+												"value": {
+													"value": "@utcnow()",
+													"type": "Expression"
+												},
 												"type": "Datetime"
 											},
 											"Status": {
@@ -590,6 +470,159 @@
 				"[concat(variables('factoryId'), '/datasets/DS_ADLS_Generic')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_OnPremSQL')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_Generic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					},
+					"Folder": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Folder",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SQL_Generic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_OnPremSQL",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ServerName": "localhost\\SQLEXPRESS",
+						"DatabaseName": "ADF_Incremental_ETL"
+					}
+				},
+				"parameters": {
+					"SchemaName": {
+						"type": "string"
+					},
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_OnPremSQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('LS_ADLS_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "integrationRuntime1",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_OnPremSQL')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"ServerName": {
+						"type": "string"
+					},
+					"DatabaseName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('LS_OnPremSQL_properties_typeProperties_server')]",
+					"database": "[parameters('LS_OnPremSQL_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": true,
+					"authenticationType": "Windows",
+					"userName": "[parameters('LS_OnPremSQL_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_OnPremSQL_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "integrationRuntime1",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime1')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {
+					"linkedInfo": {
+						"resourceId": "[parameters('integrationRuntime1_properties_typeProperties_linkedInfo_resourceId')]",
+						"authorizationType": "Rbac"
+					}
+				}
+			},
+			"dependsOn": []
 		}
 	]
 }
