@@ -3,7 +3,11 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_OnPremSQL",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ServerName": "localhost\\SQLEXPRESS",
+				"DatabaseName": "ADF_Incremental_ETL"
+			}
 		},
 		"parameters": {
 			"SchemaName": {
